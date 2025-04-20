@@ -1,5 +1,7 @@
 # Flip Clock for macOS
 
+![Flip Clock Main Window](screenshots/main-window.png)
+
 A beautiful, resizable, retro-inspired flip clock app for macOS, built with SwiftUI. The app features smooth flip animations, a fully responsive UI, and a built-in alarm system with retro beep sounds.
 
 ---
@@ -20,6 +22,22 @@ A beautiful, resizable, retro-inspired flip clock app for macOS, built with Swif
   - Alarms trigger a retro-style beep sound.
 - **Live Updating Dock Icon:**
   - The app icon in the Dock automatically updates every minute to show the current time in a retro flip clock style.
+
+---
+
+## Screenshots
+
+**Main Window**
+
+![Main](screenshots/main-window.png)
+
+**With Alarm**
+
+![With Alarm](screenshots/main-window-with-alarm.png)
+
+**Set Alarm**
+
+![Set Alarm](screenshots/main-window-set-alarm.png)
 
 ---
 
