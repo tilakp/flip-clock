@@ -18,6 +18,8 @@ A beautiful, resizable, retro-inspired flip clock app for macOS, built with Swif
   - Click anywhere on the clock to add a new alarm.
   - Add multiple alarms, enable/disable, and delete them easily.
   - Alarms trigger a retro-style beep sound.
+- **Live Updating Dock Icon:**
+  - The app icon in the Dock automatically updates every minute to show the current time in a retro flip clock style.
 
 ---
 
@@ -42,6 +44,7 @@ A beautiful, resizable, retro-inspired flip clock app for macOS, built with Swif
   - `AlarmManager.swift`: ObservableObject managing alarms, persistence, and sound playback.
   - `AppWindowAccessor.swift`: Allows customization of the NSWindow (title bar, background, etc).
   - `Color+Flip.swift`: Centralizes color definitions for easy theme changes.
+  - `FlipClockDockIconRenderer` & `AppDelegate`: Handle drawing and updating the Dock icon to reflect the current time, syncing precisely with each new minute.
   - `retro_beep.wav`: The retro alarm sound (replaceable with any WAV file).
 - **Alarm Logic:**
   - Alarms are stored in UserDefaults for persistence.
@@ -49,6 +52,27 @@ A beautiful, resizable, retro-inspired flip clock app for macOS, built with Swif
 - **Customization:**
   - All colors and fonts are easily adjustable in `Color+Flip.swift` and the relevant views.
   - The app enforces dark mode and a seamless black UI.
+
+---
+
+## App Icon
+
+The app icon is provided in multiple resolutions for macOS, including 128x128. You can find these in `Assets.xcassets/AppIcon.appiconset/`:
+
+- 16x16, 32x32, 128x128, 256x256, 512x512 (and @2x retina versions)
+- To update the icon, replace `flip-clock.png` (or your source PNG) and regenerate the icons using the provided script/commands.
+
+---
+
+## Additional Features & Changes
+
+- **12-Hour Format:** The clock and Dock icon both use a 12-hour time format for display.
+- **Rounded Dock Icon:** The live-updating Dock icon features a rounded rectangle background for a modern look.
+- **Default Icon:** A default static icon (`clock_default.png`) is shown in the Dock before the first dynamic update.
+- **Draggable Window:** The window remains draggable, even with a custom black title bar and hidden controls.
+- **Dark Mode:** The app enforces dark mode by default, regardless of system settings.
+- **Alarm UI:** Click the clock itself to add alarms—no separate button needed.
+- **Icon Generation:** Instructions and automation for generating all required icon sizes from a single PNG are provided.
 
 ---
 
