@@ -1,0 +1,7 @@
+# Build output
+release/
+DerivedData/
+build/
+*.xcuserdatad
+
+.DS_Store

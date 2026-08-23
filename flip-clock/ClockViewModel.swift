@@ -1,32 +1,36 @@
 import Foundation
 import Combine
 
-class ClockViewModel {
+final class ClockViewModel: ObservableObject {
 
     init() {
-        setupTimer()
+        ticker.start()
     }
 
     private(set) lazy var flipViewModels = { (0...5).map { _ in FlipViewModel() } }()
 
-    // MARK: - Private
-
-    private func setupTimer() {
-        Timer.publish(every: 1, on: .main, in: .default)
-            .autoconnect()
-            .map { [timeFormatter] in timeFormatter.string(from: $0) }
-            .removeDuplicates()
-            .sink(receiveValue: { [weak self] in self?.setTimeInViewModels(time: $0) })
-            .store(in: &cancellables)
-    }
-
-    private func setTimeInViewModels(time: String) {
-        zip(time, flipViewModels).forEach { number, viewModel in
-            viewModel.text = "\(number)"
+    /// When false the clock shows HH:MM and the ticker drops to one tick per minute.
+    var showSeconds: Bool = true {
+        didSet {
+            guard showSeconds != oldValue else { return }
+            ticker.interval = showSeconds ? 1 : 60
+            setTimeInViewModels(at: Date())
         }
     }
 
-    private var cancellables = Set<AnyCancellable>()
-    private let timeFormatter = DateFormatter.timeFormatter
+    // MARK: - Private
+
+    private lazy var ticker = TimeTicker(interval: 1) { [weak self] date in
+        self?.setTimeInViewModels(at: date)
+    }
+
+    private func setTimeInViewModels(at date: Date) {
+        let formatter = showSeconds ? DateFormatter.timeFormatter : .timeFormatterNoSeconds
+        // Only the leading four view models are rendered when seconds are hidden, and zip stops
+        // at the shorter sequence.
+        zip(formatter.string(from: date), flipViewModels).forEach { number, viewModel in
+            viewModel.text = "\(number)"
+        }
+    }
 
 }

@@ -1,13 +1,18 @@
 import SwiftUI
 
+/// One half of a flip card.
+///
+/// The whole card is drawn and then cropped to the requested half. Deriving both halves from the
+/// same full-size card is what keeps a digit in register across the split: the previous approach
+/// selected each half with its own chain of negative paddings, which dropped a thin band of the
+/// glyph's middle and left strokes that cross the split visibly offset.
 struct SingleFlipView: View {
 
-    init(text: String, type: FlipType, fontSize: CGFloat, digitWidth: CGFloat, digitHeight: CGFloat) {
+    init(text: String, type: FlipType, fontSize: CGFloat, tileSize: CGSize) {
         self.text = text
         self.type = type
         self.fontSize = fontSize
-        self.digitWidth = digitWidth
-        self.digitHeight = digitHeight
+        self.tileSize = tileSize
     }
 
     var body: some View {
@@ -16,13 +21,10 @@ struct SingleFlipView: View {
             .fontWeight(.heavy)
             .foregroundColor(.textColor)
             .fixedSize()
-            .padding(type.padding, -fontSize/2)
-            .frame(width: digitWidth, height: digitHeight, alignment: type.alignment)
-            .padding(type.paddingEdges, fontSize/4)
-            .clipped()
+            .frame(width: tileSize.width, height: tileSize.height)
             .background(Color.flipBackground)
-            .cornerRadius(4)
-            .padding(type.padding, -fontSize/9)
+            .clipShape(RoundedRectangle(cornerRadius: 4))
+            .frame(height: tileSize.height / 2, alignment: type.alignment)
             .clipped()
     }
 
@@ -30,33 +32,15 @@ struct SingleFlipView: View {
         case top
         case bottom
 
-        var padding: Edge.Set {
-            switch self {
-            case .top:
-                return .bottom
-            case .bottom:
-                return .top
-            }
-        }
-
-        var paddingEdges: Edge.Set {
-            switch self {
-            case .top:
-                return [.top, .leading, .trailing]
-            case .bottom:
-                return [.bottom, .leading, .trailing]
-            }
-        }
-
+        /// Which edge of the full card to keep when cropping to a half.
         var alignment: Alignment {
             switch self {
             case .top:
-                return .bottom
-            case .bottom:
                 return .top
+            case .bottom:
+                return .bottom
             }
         }
-
     }
 
     // MARK: - Private
@@ -64,7 +48,6 @@ struct SingleFlipView: View {
     private let text: String
     private let type: FlipType
     private let fontSize: CGFloat
-    private let digitWidth: CGFloat
-    private let digitHeight: CGFloat
+    private let tileSize: CGSize
 
 }

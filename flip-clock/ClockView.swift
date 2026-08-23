@@ -2,39 +2,49 @@ import SwiftUI
 
 struct ClockView: View {
 
-    let viewModel = ClockViewModel()
-    @State private var availableHeight: CGFloat = 200
+    let showSeconds: Bool
 
     var body: some View {
         GeometryReader { geometry in
-            let minDimension = min(geometry.size.width / 6.5, geometry.size.height)
-            let fontSize = minDimension * 0.8
-            let digitWidth = fontSize * 0.38
-            let digitHeight = fontSize * 0.5
-            HStack(spacing: fontSize * 0.2) {
-                HStack(spacing: fontSize * 0.07) {
-                    FlipView(viewModel: viewModel.flipViewModels[0], fontSize: fontSize, digitWidth: digitWidth, digitHeight: digitHeight)
-                    FlipView(viewModel: viewModel.flipViewModels[1], fontSize: fontSize, digitWidth: digitWidth, digitHeight: digitHeight)
-                }
-                Text(":")
-                    .font(.system(size: fontSize * 0.8, weight: .bold, design: .monospaced))
-                    .foregroundColor(.white)
-                    .frame(width: fontSize * 0.5)
-                HStack(spacing: fontSize * 0.07) {
-                    FlipView(viewModel: viewModel.flipViewModels[2], fontSize: fontSize, digitWidth: digitWidth, digitHeight: digitHeight)
-                    FlipView(viewModel: viewModel.flipViewModels[3], fontSize: fontSize, digitWidth: digitWidth, digitHeight: digitHeight)
-                }
-                Text(":")
-                    .font(.system(size: fontSize * 0.8, weight: .bold, design: .monospaced))
-                    .foregroundColor(.white)
-                    .frame(width: fontSize * 0.5)
-                HStack(spacing: fontSize * 0.07) {
-                    FlipView(viewModel: viewModel.flipViewModels[4], fontSize: fontSize, digitWidth: digitWidth, digitHeight: digitHeight)
-                    FlipView(viewModel: viewModel.flipViewModels[5], fontSize: fontSize, digitWidth: digitWidth, digitHeight: digitHeight)
+            let groups = showSeconds ? 3 : 2
+            let fontSize = FlipMetrics.fontSize(fitting: geometry.size, groups: groups)
+            let tileSize = FlipMetrics.tileSize(fontSize: fontSize)
+            HStack(spacing: fontSize * FlipMetrics.groupSpacing) {
+                digitPair(startingAt: 0, fontSize: fontSize, tileSize: tileSize)
+                colon(fontSize: fontSize)
+                digitPair(startingAt: 2, fontSize: fontSize, tileSize: tileSize)
+                if showSeconds {
+                    colon(fontSize: fontSize)
+                    digitPair(startingAt: 4, fontSize: fontSize, tileSize: tileSize)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .onAppear { viewModel.showSeconds = showSeconds }
+        .onChange(of: showSeconds) { _, newValue in viewModel.showSeconds = newValue }
+    }
+
+    // MARK: - Private
+
+    @StateObject private var viewModel = ClockViewModel()
+
+    private func digitPair(startingAt index: Int, fontSize: CGFloat, tileSize: CGSize) -> some View {
+        HStack(spacing: fontSize * FlipMetrics.pairSpacing) {
+            ForEach(index...index + 1, id: \.self) { offset in
+                FlipView(viewModel: viewModel.flipViewModels[offset],
+                         fontSize: fontSize,
+                         tileSize: tileSize)
+            }
+        }
+    }
+
+    private func colon(fontSize: CGFloat) -> some View {
+        let diameter = fontSize * FlipMetrics.colonDotDiameter
+        return VStack(spacing: fontSize * FlipMetrics.colonDotGap) {
+            Circle().fill(Color.white).frame(width: diameter, height: diameter)
+            Circle().fill(Color.white).frame(width: diameter, height: diameter)
+        }
+        .frame(width: fontSize * FlipMetrics.colonWidth)
     }
 
 }

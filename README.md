@@ -1,121 +1,123 @@
 # Flip Clock for macOS
 
-![Flip Clock Main Window](screenshots/main-window.png)
+![Flip Clock](screenshots/main-window.png)
 
-A beautiful, resizable, retro-inspired flip clock app for macOS, built with SwiftUI. The app features smooth flip animations, a fully responsive UI, and a built-in alarm system with retro beep sounds.
+A retro-inspired flip clock for macOS, built with SwiftUI. The digits bleed to the edges of the
+window at any size, the Dock icon tracks the wall clock to the minute, and alarms live behind a
+control that stays out of the way until you reach for it.
 
 ---
 
 ## Features
 
-- **Retro Flip Animation:**
-  - Digits flip smoothly, mimicking classic mechanical flip clocks.
-- **Fully Responsive:**
-  - The clock resizes dynamically to fit any window size or aspect ratio.
-- **Dark Mode by Default:**
-  - The app always launches in dark mode for a classic look.
-- **Seamless Black UI:**
-  - The entire window, including the title bar, is black for a distraction-free experience.
-- **Alarm Support:**
-  - Click anywhere on the clock to add a new alarm.
-  - Add multiple alarms, enable/disable, and delete them easily.
-  - Alarms trigger a retro-style beep sound.
-- **Live Updating Dock Icon:**
-  - The app icon in the Dock automatically updates every minute to show the current time in a retro flip clock style.
-
----
+- **Edge-to-edge digits.** The clock is sized from its own geometry, so it fills the constraining
+  axis exactly — no margin, no clipping. `⌘=` snaps the window to the clock's aspect ratio so it
+  bleeds on all four sides at once.
+- **Retro flip animation.** Each card splits across the middle and falls, as a mechanical flip
+  clock does.
+- **Minute-accurate Dock icon.** The icon redraws on the wall-clock minute and re-syncs after
+  sleep/wake, a timezone change, or a system clock correction.
+- **Alarms.** Add with `⌘N` or the bell that appears on hover. Enable, disable, or delete them from
+  the popover. A ringing alarm can be snoozed or dismissed.
+- **Chrome that gets out of the way.** Window buttons and the bell fade out when the pointer
+  leaves, leaving only the clock. The window drags from anywhere.
+- **Seconds toggle** (`⌘S`) and **always on top** (`⌘T`), both remembered between launches.
 
 ## Screenshots
 
-**Main Window**
+**Alarm ringing**
 
-![Main](screenshots/main-window.png)
+![Alarm ringing](screenshots/alarm-ringing.png)
 
-**With Alarm**
+**Managing alarms**
 
-![With Alarm](screenshots/main-window-with-alarm.png)
+![Alarm popover](screenshots/alarm-popover.png)
 
-**Set Alarm**
+---
 
-![Set Alarm](screenshots/main-window-set-alarm.png)
+## Keyboard shortcuts
+
+| Shortcut | Action |
+|---|---|
+| `⌘N` | New alarm (opens the alarm popover) |
+| `⌘=` | Fit the window to the clock's aspect ratio |
+| `⌘S` | Show/hide seconds |
+| `⌘T` | Always on top |
+| `Esc` | Silence a ringing alarm |
+
+The same items are available from the **Clock** menu and from a right-click on the clock face.
 
 ---
 
 ## How to Use
 
-1. **Run the app.**
-2. **Resize** the window to your liking—the clock and digits will always fit perfectly.
-3. **Add alarms** by clicking anywhere on the clock display. Set the time and save.
-4. **Manage alarms** in the horizontal list below the clock. Enable/disable or delete as needed.
-5. When an alarm goes off, you'll hear a retro beep sound.
-
----
-
-## Code Structure & Explanation
-
-- **SwiftUI-Based:**
-  - The UI is built using SwiftUI for declarative, modern, and responsive design.
-- **Key Files:**
-  - `ContentView.swift`: Main entry point, manages layout, alarm sheet, and window appearance.
-  - `ClockView.swift`: Contains the flip clock layout and handles responsive sizing.
-  - `FlipView.swift` & `SingleFlipView.swift`: Implement the flip animation for each digit.
-  - `AlarmManager.swift`: ObservableObject managing alarms, persistence, and sound playback.
-  - `AppWindowAccessor.swift`: Allows customization of the NSWindow (title bar, background, etc).
-  - `Color+Flip.swift`: Centralizes color definitions for easy theme changes.
-  - `FlipClockDockIconRenderer` & `AppDelegate`: Handle drawing and updating the Dock icon to reflect the current time, syncing precisely with each new minute.
-  - `retro_beep.wav`: The retro alarm sound (replaceable with any WAV file).
-- **Alarm Logic:**
-  - Alarms are stored in UserDefaults for persistence.
-  - When the system time matches an enabled alarm, the sound plays and the alarm auto-disables.
-- **Customization:**
-  - All colors and fonts are easily adjustable in `Color+Flip.swift` and the relevant views.
-  - The app enforces dark mode and a seamless black UI.
-
----
-
-## App Icon
-
-The app icon is provided in multiple resolutions for macOS, including 128x128. You can find these in `Assets.xcassets/AppIcon.appiconset/`:
-
-- 16x16, 32x32, 128x128, 256x256, 512x512 (and @2x retina versions)
-- To update the icon, replace `flip-clock.png` (or your source PNG) and regenerate the icons using the provided script/commands.
-
----
-
-## Additional Features & Changes
-
-- **12-Hour Format:** The clock and Dock icon both use a 12-hour time format for display.
-- **Rounded Dock Icon:** The live-updating Dock icon features a rounded rectangle background for a modern look.
-- **Default Icon:** A default static icon (`clock_default.png`) is shown in the Dock before the first dynamic update.
-- **Draggable Window:** The window remains draggable, even with a custom black title bar and hidden controls.
-- **Dark Mode:** The app enforces dark mode by default, regardless of system settings.
-- **Alarm UI:** Click the clock itself to add alarms—no separate button needed.
-- **Icon Generation:** Instructions and automation for generating all required icon sizes from a single PNG are provided.
+1. **Run the app.** Resize the window however you like — the clock always fills it.
+2. Press **`⌘=`** to snap the window to the clock's exact proportions for a perfect edge-to-edge fit.
+3. **Add alarms** with `⌘N`, or move the pointer over the window and click the bell in the corner.
+4. When an alarm goes off, the clock dims and a banner offers **Snooze** or **Dismiss**. An
+   untouched alarm silences itself after a minute. Alarms disable themselves once they have fired.
 
 ---
 
 ## Requirements
 
-- macOS 12.0+
-- Xcode 14+
+- macOS 15.4+
+- Xcode 16+
+
+## Build and test
+
+```bash
+xcodebuild -project flip-clock.xcodeproj -scheme flip-clock -configuration Debug build
+xcodebuild -project flip-clock.xcodeproj -scheme flip-clock test -only-testing:flip-clockTests
+```
+
+`./release.sh` builds the Release configuration, installs the app to `/Applications`, and writes a
+distributable disk image to `release/`. It needs [`create-dmg`](https://github.com/create-dmg/create-dmg)
+(`brew install create-dmg`) for the disk image step.
 
 ---
 
-## Customization & Extensibility
+## Code Structure
 
-- **Change Alarm Sound:**
-  - Replace `retro_beep.wav` in the project directory with your own WAV file.
-- **Digit Colors:**
-  - Edit `Color+Flip.swift` to change digit or background colors.
-- **Add Features:**
-  - The modular codebase makes it easy to add features like AM/PM display, snooze, or custom themes.
+- `FlipMetrics.swift` — the clock's geometry, expressed in multiples of the font size, and the fit
+  math that turns a window size into a font size. Single source of truth: the views lay out from
+  these same constants, so the sizing math cannot drift from what is drawn.
+- `TimeTicker.swift` — a timer that fires on true wall-clock boundaries and re-arms itself after
+  every tick, runs in the `.common` run-loop mode (so it keeps ticking during a window resize or
+  drag), and re-syncs on wake and clock changes. The clock, the Dock icon, and the alarm check each
+  own one.
+- `ClockView.swift` / `ClockViewModel.swift` — the digit row and the once-per-second fan-out into
+  six `FlipViewModel`s.
+- `FlipView.swift` / `SingleFlipView.swift` — the flip animation. A card is drawn whole and then
+  cropped to its top or bottom half, which is what keeps a digit in register across the split.
+- `AlarmManager.swift` — alarm storage (`UserDefaults`), matching, sound, ringing state, snooze.
+- `AppSettings.swift` — persisted preferences (seconds, always on top).
+- `ContentView.swift` — layout, hover chrome, alarm popover, ringing banner, window configuration.
+- `AppWindowAccessor.swift` — hands the hosting `NSWindow` back to SwiftUI so window chrome can be
+  driven from view state.
+- `flip_clockApp.swift` — app entry point, menu commands, and the Dock icon renderer.
+- `retro_beep.wav` — the alarm sound (replaceable with any WAV file).
+
+---
+
+## Customization
+
+- **Alarm sound:** replace `retro_beep.wav`.
+- **Colors:** edit `Color+Flip.swift` (`textColor`, `flipBackground`, `separator`).
+- **Proportions:** edit `FlipMetrics.swift` — card size, spacing, and colon dots are all defined
+  there, and the layout follows automatically.
+
+---
+
+## App Icon
+
+Icons live in `Assets.xcassets/AppIcon.appiconset/` at 16×16 through 512×512 (plus @2x). The Dock
+icon is drawn at runtime from the current time; the asset-catalog icon is what other surfaces show.
 
 ---
 
 ## Credits
 - Retro beep sound from [freesound.org](https://freesound.org/people/Soundholder/sounds/425331/) (Creative Commons 0).
-
----
 
 ## License
 MIT License
