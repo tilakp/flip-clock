@@ -65,11 +65,15 @@ struct ContentView: View {
         Button {
             showingAlarms.toggle()
         } label: {
+            // The corner this sits in is usually a digit card, which is near-white, so the chip
+            // carries its own dark ground rather than tinting whatever is behind it.
             Image(systemName: hasEnabledAlarm ? "bell.fill" : "bell")
-                .font(.system(size: 15))
-                .foregroundColor(.white)
-                .padding(8)
-                .background(Circle().fill(Color.white.opacity(0.12)))
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(.white)
+                .padding(9)
+                .background(Circle().fill(Color.black.opacity(0.72)))
+                .overlay(Circle().strokeBorder(Color.white.opacity(0.28), lineWidth: 1))
+                .shadow(color: .black.opacity(0.45), radius: 4, y: 1)
         }
         .buttonStyle(.plain)
         .help("Alarms")
