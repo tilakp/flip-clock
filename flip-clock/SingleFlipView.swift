@@ -8,11 +8,12 @@ import SwiftUI
 /// glyph's middle and left strokes that cross the split visibly offset.
 struct SingleFlipView: View {
 
-    init(text: String, type: FlipType, fontSize: CGFloat, tileSize: CGSize) {
+    init(text: String, type: FlipType, fontSize: CGFloat, tileSize: CGSize, cornerRadius: CGFloat) {
         self.text = text
         self.type = type
         self.fontSize = fontSize
         self.tileSize = tileSize
+        self.cornerRadius = cornerRadius
     }
 
     var body: some View {
@@ -23,9 +24,8 @@ struct SingleFlipView: View {
             .fixedSize()
             .frame(width: tileSize.width, height: tileSize.height)
             .background(Color.flipBackground)
-            .clipShape(RoundedRectangle(cornerRadius: 4))
             .frame(height: tileSize.height / 2, alignment: type.alignment)
-            .clipped()
+            .clipShape(type.shape(cornerRadius: cornerRadius))
     }
 
     enum FlipType {
@@ -41,6 +41,18 @@ struct SingleFlipView: View {
                 return .bottom
             }
         }
+
+        /// A half card is rounded on its outer edge and square where it meets the hinge.
+        func shape(cornerRadius radius: CGFloat) -> UnevenRoundedRectangle {
+            switch self {
+            case .top:
+                return UnevenRoundedRectangle(topLeadingRadius: radius, bottomLeadingRadius: 0,
+                                              bottomTrailingRadius: 0, topTrailingRadius: radius)
+            case .bottom:
+                return UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: radius,
+                                              bottomTrailingRadius: radius, topTrailingRadius: 0)
+            }
+        }
     }
 
     // MARK: - Private
@@ -49,5 +61,6 @@ struct SingleFlipView: View {
     private let type: FlipType
     private let fontSize: CGFloat
     private let tileSize: CGSize
+    private let cornerRadius: CGFloat
 
 }

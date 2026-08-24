@@ -52,6 +52,12 @@ an even whole number of points, because `FlipView` splits it down the middle and
 shows a seam. Change a constant here and the layout, the fit math, and the tests all follow — never
 hardcode a spacing in a view.
 
+**Margins are folded into the fit math, not applied as padding.** `FlipMetrics.margin` is in
+fontSize units, so `f * (units + 2 * margin) = available` inverts directly in
+`fontSize(fitting:groups:)`. `contentSize(fontSize:groups:)` is the forward direction and the two
+must stay inverses. The margin then appears on its own because `ClockView` centres the row — there
+is no padding modifier to keep in sync.
+
 **The flip card is drawn whole, then cropped.** `SingleFlipView` renders the full card and crops to
 its top or bottom half via `.frame(height:alignment:)` + `.clipped()`. This matters: the original
 selected each half with its own chain of negative paddings, which silently dropped ~0.033 × fontSize
@@ -59,6 +65,24 @@ of the glyph's middle and left strokes crossing the split visibly offset. Both h
 crops of the same card. `FlipView` stacks top half + 1 pt separator + bottom half, each half a
 `ZStack` of a static and a `rotation3DEffect`-rotated copy; `FlipViewModel.text`'s `didSet` drives
 the two chained `withAnimation` blocks (top falls 0.2 s, bottom rises after a 0.2 s delay).
+
+**The flip animation is one animatable value per leaf.** `FlipLeaf` (in `FlipView.swift`) is an
+`Animatable` `ViewModifier` whose `animatableData` is the leaf's progress; it derives both the
+rotation angle and the shading from that, so the leaf is always exactly as dark as its angle
+implies. Animating an opacity alongside a rotation instead lets the two drift apart and looks flat.
+`FlipViewModel` drives the two phases: `.easeIn` for the fall (gravity accelerates) and a
+`timingCurve` ending above 1 for the settle, which overshoots slightly as the leaf hits the stop.
+
+**Two hairline artifacts, both fixed, both easy to reintroduce:**
+- `Color` has no intrinsic width. Inside `FlipView`'s `.fixedSize()` VStack it draws to the width
+  it was *proposed* rather than the stack's, painting the separator straight across the whole row
+  of digits. Its `.frame(width: tileSize.width, ...)` is load-bearing.
+- A perspective `rotation3DEffect` is singular edge-on: at exactly ±90° the projection diverges and
+  smears a line across the window. The resting top leaf sits at −90°, so `FlipLeaf` drops any leaf
+  within `edgeOnAngle` of edge-on — it has no face left to show at that angle anyway.
+- Diagnosing these needs full-resolution crops. Downscaled screenshots blur six per-card hairlines
+  into one apparently continuous line, which sends you hunting for a row-spanning view that isn't
+  there.
 
 **Window chrome is applied from `ContentView.configure(_:)`** via `AppWindowAccessor`, which fires on
 every SwiftUI update (not just creation) so hover state and always-on-top reach the window. The

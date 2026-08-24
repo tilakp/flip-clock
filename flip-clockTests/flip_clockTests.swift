@@ -33,14 +33,31 @@ struct FlipMetricsTests {
         #expect(abs(FlipMetrics.heightUnits - 1.2777) < 0.0001)
     }
 
-    /// A wide, short window is height-constrained: the clock must touch top and bottom exactly.
+    /// A wide, short window is height-constrained: the clock plus its margins must fill the
+    /// height exactly.
     @Test("Fills the constraining axis exactly", arguments: [2, 3])
     func fillsConstrainingAxis(groups: Int) {
         let size = CGSize(width: 4000, height: 300)
         let fontSize = FlipMetrics.fontSize(fitting: size, groups: groups)
-        let usedHeight = fontSize * FlipMetrics.heightUnits + FlipMetrics.separatorHeight
-        #expect(abs(usedHeight - size.height) < 0.0001)
-        #expect(fontSize * FlipMetrics.widthUnits(groups: groups) <= size.width)
+        let used = FlipMetrics.contentSize(fontSize: fontSize, groups: groups)
+        #expect(abs(used.height - size.height) < 0.0001)
+        #expect(used.width <= size.width)
+    }
+
+    /// The margin has to be real at every size, or "add some breathing room" silently becomes a
+    /// full bleed again.
+    @Test("Leaves a margin on the constraining axis", arguments: [
+        CGSize(width: 800, height: 400), CGSize(width: 1600, height: 200), CGSize(width: 300, height: 900)
+    ])
+    func leavesAMargin(size: CGSize) {
+        for groups in [2, 3] {
+            let fontSize = FlipMetrics.fontSize(fitting: size, groups: groups)
+            let digits = fontSize * FlipMetrics.widthUnits(groups: groups)
+            let expected = fontSize * FlipMetrics.margin
+            #expect(expected > 0)
+            // Digits alone must stop short of the window by a margin on each side.
+            #expect(size.width - digits >= expected * 2 - 0.0001)
+        }
     }
 
     /// The old formula (min(width / 6.5, height) * 0.8) left ~10% slack when width-constrained
@@ -54,14 +71,13 @@ struct FlipMetricsTests {
     func fitsWithoutOverflow(size: CGSize) {
         for groups in [2, 3] {
             let fontSize = FlipMetrics.fontSize(fitting: size, groups: groups)
-            let usedWidth = fontSize * FlipMetrics.widthUnits(groups: groups)
-            let usedHeight = fontSize * FlipMetrics.heightUnits + FlipMetrics.separatorHeight
+            let used = FlipMetrics.contentSize(fontSize: fontSize, groups: groups)
 
-            #expect(usedWidth <= size.width + 0.0001)
-            #expect(usedHeight <= size.height + 0.0001)
-            // One axis is filled to the edge — that is what "bleed" means.
-            let fillsWidth = abs(usedWidth - size.width) < 0.0001
-            let fillsHeight = abs(usedHeight - size.height) < 0.0001
+            #expect(used.width <= size.width + 0.0001)
+            #expect(used.height <= size.height + 0.0001)
+            // Clock plus margins fills one axis exactly.
+            let fillsWidth = abs(used.width - size.width) < 0.0001
+            let fillsHeight = abs(used.height - size.height) < 0.0001
             #expect(fillsWidth || fillsHeight)
         }
     }

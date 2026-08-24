@@ -22,6 +22,19 @@ enum FlipMetrics {
     static let colonDotGap: CGFloat = 0.10       // vertical space between the two dots
     static let separatorHeight: CGFloat = 1      // points — the hairline in FlipView, not scaled
 
+    /// Breathing room on each side of the clock, in fontSize units. Because it scales with the
+    /// font it stays proportional at every window size, and it folds into the fit math below as
+    /// two extra units per axis rather than needing a separate padding pass.
+    static let margin: CGFloat = 0.12
+
+    // Flip animation.
+    static let flipPerspective: CGFloat = 0.42
+    /// How dark a leaf goes when it is edge-on to the light.
+    static let leafMaxShade: Double = 0.55
+
+    /// Card corner radius, scaled so large digits don't look sharp-cornered.
+    static func cornerRadius(fontSize: CGFloat) -> CGFloat { max(3, fontSize * 0.028) }
+
 
     /// Total width, in font-size units, of `groups` two-digit groups separated by colons.
     /// 3 groups (HH:MM:SS) ≈ 7.29, 2 groups (HH:MM) ≈ 4.56.
@@ -44,18 +57,27 @@ enum FlipMetrics {
                       height: height - height.truncatingRemainder(dividingBy: 2))
     }
 
-    /// The height at which a clock of the given width bleeds on both axes.
+    /// The height at which a clock of the given width has equal margins on all four sides.
     static func fittedHeight(forWidth width: CGFloat, groups: Int) -> CGFloat {
         guard groups > 0, width > 0 else { return 0 }
-        return width / widthUnits(groups: groups) * heightUnits + separatorHeight
+        let fontSize = width / (widthUnits(groups: groups) + 2 * margin)
+        return contentSize(fontSize: fontSize, groups: groups).height
     }
 
-    /// The largest font size whose clock fits `size` exactly — it touches both edges of the
-    /// constraining axis and never overflows the other.
+    /// Total space the clock occupies at this font size, margins included. `fontSize(fitting:)`
+    /// is its inverse, so the two can't drift apart.
+    static func contentSize(fontSize: CGFloat, groups: Int) -> CGSize {
+        CGSize(width: fontSize * (widthUnits(groups: groups) + 2 * margin),
+               height: fontSize * (heightUnits + 2 * margin) + separatorHeight)
+    }
+
+    /// The largest font size whose clock, margins included, fits `size` — it fills the
+    /// constraining axis exactly and never overflows the other.
     static func fontSize(fitting size: CGSize, groups: Int) -> CGFloat {
         guard groups > 0, size.width > 0, size.height > 0 else { return 0 }
         let usableHeight = max(size.height - separatorHeight, 0)
-        return max(min(size.width / widthUnits(groups: groups), usableHeight / heightUnits), 0)
+        return max(min(size.width / (widthUnits(groups: groups) + 2 * margin),
+                       usableHeight / (heightUnits + 2 * margin)), 0)
     }
 
 }

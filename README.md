@@ -2,19 +2,22 @@
 
 ![Flip Clock](screenshots/main-window.png)
 
-A retro-inspired flip clock for macOS, built with SwiftUI. The digits bleed to the edges of the
-window at any size, the Dock icon tracks the wall clock to the minute, and alarms live behind a
-control that stays out of the way until you reach for it.
+A retro-inspired flip clock for macOS, built with SwiftUI. The digits scale to fill whatever
+window you give them, the leaves fall and settle like the mechanical article, the Dock icon tracks
+the wall clock to the minute, and alarms live behind a control that stays out of the way until you
+reach for it.
 
 ---
 
 ## Features
 
-- **Edge-to-edge digits.** The clock is sized from its own geometry, so it fills the constraining
-  axis exactly — no margin, no clipping. `⌘=` snaps the window to the clock's aspect ratio so it
-  bleeds on all four sides at once.
-- **Retro flip animation.** Each card splits across the middle and falls, as a mechanical flip
-  clock does.
+- **Digits that fit any window.** The clock is sized from its own geometry, so it fills the
+  window on the constraining axis with an even margin and never clips. `⌘=` snaps the window to
+  the clock's proportions, giving equal margins on all four sides.
+- **A flip that behaves like a leaf.** Each card splits across the middle; the leaf accelerates
+  under gravity through the top half, carries that speed into the bottom half, and overshoots a
+  little as it hits the stop. Its shading is derived from its angle, so it darkens as it turns
+  edge-on and brightens as it lands.
 - **Minute-accurate Dock icon.** The icon redraws on the wall-clock minute and re-syncs after
   sleep/wake, a timezone change, or a system clock correction.
 - **Alarms.** Add with `⌘N` or the bell that appears on hover. Enable, disable, or delete them from
@@ -90,6 +93,8 @@ distributable disk image to `release/`. It needs [`create-dmg`](https://github.c
   six `FlipViewModel`s.
 - `FlipView.swift` / `SingleFlipView.swift` — the flip animation. A card is drawn whole and then
   cropped to its top or bottom half, which is what keeps a digit in register across the split.
+  `FlipLeaf` is an `Animatable` modifier that derives a leaf's rotation and its shading from one
+  value, so the two can never drift out of step.
 - `AlarmManager.swift` — alarm storage (`UserDefaults`), matching, sound, ringing state, snooze.
 - `AppSettings.swift` — persisted preferences (seconds, always on top).
 - `ContentView.swift` — layout, hover chrome, alarm popover, ringing banner, window configuration.
@@ -104,8 +109,10 @@ distributable disk image to `release/`. It needs [`create-dmg`](https://github.c
 
 - **Alarm sound:** replace `retro_beep.wav`.
 - **Colors:** edit `Color+Flip.swift` (`textColor`, `flipBackground`, `separator`).
-- **Proportions:** edit `FlipMetrics.swift` — card size, spacing, and colon dots are all defined
-  there, and the layout follows automatically.
+- **Proportions:** edit `FlipMetrics.swift` — card size, spacing, margin, and colon dots are all
+  defined there, and the layout follows automatically.
+- **Flip feel:** the timings live in `FlipViewModel.swift` (`fallDuration`, `settleDuration`) and
+  the perspective and shading depth in `FlipMetrics.swift`.
 
 ---
 
