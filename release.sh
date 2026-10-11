@@ -9,7 +9,7 @@ APP_NAME="flip-clock.app"
 OUT="release"
 DERIVED="$OUT/DerivedData"
 STAGING="$OUT/staging"
-DMG="$OUT/flip-clock-Installer.dmg"
+DMG="$OUT/FlipClock.dmg"
 
 echo "==> Building Release"
 xcodebuild -project flip-clock.xcodeproj -scheme "$SCHEME" -configuration Release \
